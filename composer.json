@@ -1,0 +1,36 @@
+{  
+    "name": "bingo-soft/util",
+    "license": "MIT",
+    "authors": [{
+        "name": "Bingo-Soft",
+        "email": "bingosoft@bk.ru"
+    }],
+    "description": "Utility classes for PHP",
+    "keywords": ["php", "util", "proxy"],
+    "homepage": "https://github.com/bingo-soft/concurrent",
+    "type": "project",
+    "config": {
+        "vendor-dir": "./vendor",
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "require": {
+        "php": "^7.4 || ^8.0"
+    },
+    "require-dev": {
+        "doctrine/coding-standard": "*",
+        "squizlabs/php_codesniffer": "*",
+        "phpunit/phpunit": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Util\\": "./src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": { 
+            "Tests\\": "./tests"
+        }
+    }
+}
