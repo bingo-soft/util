@@ -19,47 +19,57 @@ composer require bingo-soft/util
 # Proxy class
 
 ```php
-interface InterInterface
-{
-    public function originalMethod(string $s, $d = null, int $z = 1);
-}
+/* Original class */
 
-interface SecondInterface
+interface BusinessServiceInterface
 {
 }
 
-class Original implements InterInterface
+class BusinessServiceImpl
 {
-    public function originalMethod(string $s, $d = null, int $z = 1)
+    public function doSomething(int $id, string $name)
     {
-        return $s;
-    }
-}
-//////////////////////////////////////////
-use Util\Proxy\InvocationHandlerInterface;
-
-class Handler implements InvocationHandlerInterface
-{
-    private $original;
-
-    public function __construct($original)
-    {
-        $this->original = $original;
-    }
-
-    public function invoke($proxy, \ReflectionMethod $method, array $args)
-    {
-        return ["Before" , $method->invoke($this->original, ...$args), "After"];
+        return "$id - $name";
     }
 }
 
-$original = new Original();
-$handler = new Handler($original);
-//Create proxy class, implementing two interfaces
-$proxy = Proxy::newProxyInstance([ InterInterface::class, SecondInterface::class ], $handler);
-//$proxy instanceof InterInterface -> true
-$res = $proxy->originalMethod('Hello');
-var_dump($res); // prints array ["Before", "Hello", "After"]
+/* Handler */
+
+use Util\Proxy\MethodHandlerInterface;
+
+class DoSomethingMethodHandler implements MethodHandlerInterface
+{
+    public function invoke($proxy, \ReflectionMethod $thisMethod, \ReflectionMethod $proceed, array $args)
+    {
+        return 'prepend - ' . $proceed->invoke($proxy, ...$args);
+    }
+}
+
+/* Custom proxy factory*/
+
+use Util\Proxy\{
+    MethodHandlerInterface,
+    ProxyFactory
+};
+
+class MyProxyFactory
+{
+    public static function createProxy(string $type, MethodHandlerInterface $method, array $args = [])
+    {
+        $enhancer = new ProxyFactory();
+        $enhancer->setSuperclass($type);
+        $enhancer->setInterfaces([ BusinessServiceInterface::class ]);
+        return $enhancer->create($args);
+    }
+}
+
+/* Creation and test of proxy class*/
+
+$method = new DoSomethingMethodHandler();
+$proxy = MyProxyFactory::createProxy(BusinessServiceImpl::class, $method);
+$proxy->setHandler($method);
+echo $proxy->doSomething(1, "curitis"); // will print "prepend - 1 - curitis"
+
 ```
 
 # Running tests

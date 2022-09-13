@@ -7,7 +7,7 @@ use Util\Proxy\{
     ProxyFactory
 };
 
-class ExtensionProxyFactory
+class MyProxyFactory
 {
     public static function createProxy(string $type, MethodHandlerInterface $method, array $args = [])
     {
