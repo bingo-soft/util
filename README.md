@@ -16,7 +16,7 @@ Install library, using Composer:
 composer require bingo-soft/util
 ```
 
-# Example
+# Example of proxy class generation
 
 ```php
 /* Original class */
