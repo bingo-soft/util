@@ -20,7 +20,7 @@ class ProxyFactory
         $this->interfaces = $interfaces;
     }
 
-    public function create(array $args)
+    public function create(array $args = [])
     {
         $proxyGenerator = new ProxyGenerator($this->superClass, $this->interfaces);
         $cons = $proxyGenerator->generateProxyClass();

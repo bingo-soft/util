@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Tests\Proxy;
 
 use Util\Proxy\{
     MethodHandlerInterface,

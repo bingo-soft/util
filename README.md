@@ -16,7 +16,7 @@ Install library, using Composer:
 composer require bingo-soft/util
 ```
 
-# Example of proxy class generation
+# Proxy class
 
 ```php
 /* Original class */
@@ -69,6 +69,35 @@ $method = new DoSomethingMethodHandler();
 $proxy = MyProxyFactory::createProxy(BusinessServiceImpl::class, $method);
 $proxy->setHandler($method);
 echo $proxy->doSomething(1, "curitis"); // will print "prepend - 1 - curitis"
+
+```
+
+# Enhanced reflection with meta objects
+
+```php
+
+/* Set nested property */
+
+use Tests\Domain\Misc\RichType;
+use Util\Reflection\{
+    MetaClass,
+    MetaObject,
+    SystemMetaObject
+};
+
+$rich = new RichType();
+$meta = SystemMetaObject::forObject($rich);
+$meta->setValue("richType.richField", "foo");
+
+echo $meta->getValue("richType.richField"); // new RichType( richType => new RichType ( richField => "foo" )) 
+
+/* Create meta object from array */
+
+$map = [];
+$metaMap = SystemMetaObject::forObject($map);
+$metaMap->setValue("id", "100");
+$metaMap->setValue("name.first", "Clinton");
+print_r($map); // [ "id" => 100, "name" => [ "first" => "Clinton" ]]
 
 ```
 
