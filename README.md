@@ -72,18 +72,14 @@ echo $proxy->doSomething(1, "curitis"); // will print "prepend - 1 - curitis"
 
 ```
 
-# Enhanced reflection with meta objects
+# Enhanced reflection
 
 ```php
 
 /* Set nested property */
 
 use Tests\Domain\Misc\RichType;
-use Util\Reflection\{
-    MetaClass,
-    MetaObject,
-    SystemMetaObject
-};
+use Util\Reflection\SystemMetaObject;
 
 $rich = new RichType();
 $meta = SystemMetaObject::forObject($rich);
