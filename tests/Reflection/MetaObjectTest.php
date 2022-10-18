@@ -261,4 +261,15 @@ class MetaObjectTest extends TestCase
         $this->assertTrue($meta->hasGetter("filterParams[1]"));
         $this->assertTrue($meta->hasGetter("filterParams[2]"));
     }
+
+    public function testPropertyInitialized(): void
+    {
+        $rich = new RichType();
+        $meta = SystemMetaObject::forObject($rich);
+        $meta->setValue("richType.richField", "foo");
+        $meta->setValue("richType.richType.richField", "foo");
+        $this->assertTrue($meta->isPropertyInitialized("richType.richField"));
+        $this->assertTrue($meta->isPropertyInitialized("richType.richType.richField"));
+        $this->assertFalse($meta->isPropertyInitialized("richType.richType.richType.richField"));
+    }
 }

@@ -13,6 +13,7 @@ class MetaObject extends \ReflectionObject
 {
     private $originalObject;
     private $objectWrapper;
+    private $initializedProperties = [];
 
     public function __construct(&$object = null, ?MetaObject $scope = null, ?string $propertyName = null)
     {
@@ -84,6 +85,9 @@ class MetaObject extends \ReflectionObject
                     $metaValue = $this->objectWrapper->instantiatePropertyValue($name, $prop);
                 }
             }
+            if (!in_array($name, $this->initializedProperties)) {
+                $this->initializedProperties[] = $name;
+            }
             $metaValue->setValue($prop->getChildren(), $value);
         } else {
             $this->objectWrapper->set($prop, $value);
@@ -119,5 +123,10 @@ class MetaObject extends \ReflectionObject
     public function addAll(array $list): void
     {
         $this->objectWrapper->addAll($list);
+    }
+
+    public function isPropertyInitialized(string $property): bool
+    {
+        return in_array($property, $this->initializedProperties);
     }
 }
