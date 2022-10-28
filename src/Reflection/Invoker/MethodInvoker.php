@@ -34,4 +34,14 @@ class MethodInvoker implements InvokerInterface
     {
         return $this->type;
     }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getOriginalMethod(): \ReflectionMethod
+    {
+        return $this->method;
+    }
 }

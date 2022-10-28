@@ -15,6 +15,9 @@ class MetaObject extends \ReflectionObject
     private $objectWrapper;
     private $initializedProperties = [];
 
+    private const SIMPLE_TYPE_ALIASES = ['integer' => 'int', 'double' => 'float', 'boolean' => 'bool'];
+    private $isStrictTypeChecking = false;
+
     public function __construct(&$object = null, ?MetaObject $scope = null, ?string $propertyName = null)
     {
         $this->originalObject = &$object;
@@ -75,6 +78,7 @@ class MetaObject extends \ReflectionObject
 
     public function setValue(string $name, $value): void
     {
+        $this->validatePropertyValue($name, $value);
         $prop = new PropertyTokenizer($name);
         if ($prop->valid()) {
             $metaValue = $this->metaObjectForProperty($prop->getIndexedName());
@@ -87,7 +91,7 @@ class MetaObject extends \ReflectionObject
             }
             if (!in_array($name, $this->initializedProperties)) {
                 $this->initializedProperties[] = $name;
-            }
+            }            
             $metaValue->setValue($prop->getChildren(), $value);
         } else {
             $this->objectWrapper->set($prop, $value);
@@ -128,5 +132,35 @@ class MetaObject extends \ReflectionObject
     public function isPropertyInitialized(string $property): bool
     {
         return in_array($property, $this->initializedProperties);
+    }
+
+    public function setStrictTypeChecking(): void
+    {
+        $this->isStrictTypeChecking = true;
+    }
+
+    private function validatePropertyValue(string $property, $value): void
+    {
+        if ($this->isStrictTypeChecking) {
+            $propertyType = $this->getSetterType($property);
+            if (class_exists($propertyType)) {
+                if (!($value instanceof $propertyType)) {
+                    if (is_object($value)) {
+                        throw new \TypeError(sprintf("Cannot assign \"%s\" to property $property of type \"%s\"", get_class($value), $propertyType));
+                    } else {
+                        throw new \TypeError(sprintf("Cannot assign \"%s\" to property $property of type \"%s\"", gettype($value), $propertyType));
+                    }
+                }
+            } else {
+                if (is_object($value)) {
+                    throw new \TypeError(sprintf("Cannot assign \"%s\" to property $property of type \"%s\"", get_class($value), $propertyType));
+                } else {
+                    $type = gettype($value);
+                    if ($type != $propertyType || (array_key_exists($type, self::SIMPLE_TYPE_ALIASES) && self::SIMPLE_TYPE_ALIASES[$type] != $propertyType)) {
+                        throw new \TypeError(sprintf("Cannot assign \"%s\" to property $property of type \"%s\"", $type, $propertyType));
+                    }
+                }
+            }
+        }
     }
 }
