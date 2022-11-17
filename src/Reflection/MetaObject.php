@@ -38,6 +38,11 @@ class MetaObject extends \ReflectionObject
         return $this->originalObject;
     }
 
+    public function findProperty(string $propName, bool $useCamelCaseMapping = false): ?string
+    {
+        return $this->objectWrapper->findProperty($propName, $useCamelCaseMapping);
+    }
+
     public function hasSetter(string $name): bool
     {
         return $this->objectWrapper->hasSetter($name);
