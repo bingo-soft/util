@@ -13,7 +13,7 @@ class ArrayWrapper extends BaseWrapper
     private $map;
     private $id;
 
-    public function __construct(MetaObject $metaObject, array &$map, ?MetaObject $scope = null, ?string $propertyName = null)
+    public function __construct(MetaObject $metaObject, &$map, ?MetaObject $scope = null, ?string $propertyName = null)
     {
         parent::__construct($metaObject, $scope, $propertyName);
         $this->map = &$map;
@@ -27,7 +27,7 @@ class ArrayWrapper extends BaseWrapper
             return $this->getCollectionValue($prop, $collection);
         } else {
             $key = $prop->getName();
-            if (array_key_exists($key, $this->map)) {
+            if ((is_array($this->map) && array_key_exists($key, $this->map)) || ($this->map instanceof \ArrayObject && array_key_exists($key, $this->map->getArrayCopy()))) {
                 return $this->map[$key];
             }
             return null;
@@ -39,6 +39,9 @@ class ArrayWrapper extends BaseWrapper
         if ($prop->getIndex() !== null) {
             $collection = $this->resolveCollection($prop, $this->map);
             $this->setCollectionValue($prop, $collection, $value);
+            if ($this->map instanceof \ArrayObject) {
+                $this->map[$prop->getName()] = $collection;
+            }
         } else {
             $this->map[$prop->getName()] = &$value;
             if ($this->scope !== null && $this->propertyName !== null) {

@@ -30,9 +30,9 @@ abstract class BaseWrapper implements ObjectWrapperInterface
 
     protected function getCollectionValue(PropertyTokenizer $prop, &$collection)
     {
-        if (is_array($collection)) {
+        if (is_array($collection) || $collection instanceof \ArrayObject) {
             $i = $prop->getIndex();
-            if (array_key_exists($i, $collection)) {
+            if ((is_array($collection) && array_key_exists($i, $collection)) || ($collection instanceof \ArrayObject && array_key_exists($i, $collection->getArrayCopy()))) {
                 return $collection[$i];
             }
             return null;
@@ -41,9 +41,9 @@ abstract class BaseWrapper implements ObjectWrapperInterface
         }
     }
 
-    protected function setCollectionValue(PropertyTokenizer $prop, array &$collection, $value): void
+    protected function setCollectionValue(PropertyTokenizer $prop, &$collection, $value): void
     {
-        if (is_array($collection)) {
+        if (is_array($collection) || $collection instanceof \ArrayObject) {
             $collection[$prop->getIndex()] = $value;
         } else {
             throw new \ReflectionException("The '" . $prop->getName() . "' property is not an array.");

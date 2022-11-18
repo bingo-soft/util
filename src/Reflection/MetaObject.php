@@ -21,7 +21,7 @@ class MetaObject extends \ReflectionObject
         if ($object instanceof ObjectWrapperInterface) {
             $this->objectWrapper = $object;
             parent::__construct($this->objectWrapper);
-        } elseif (is_array($object)) {
+        } elseif (is_array($object) || $object instanceof \ArrayObject) {
             $this->objectWrapper = new ArrayWrapper($this, $object, $scope, $propertyName);
             parent::__construct($this->objectWrapper);
         } elseif ($object === null) {
