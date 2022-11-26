@@ -67,7 +67,7 @@ class ArrayWrapper extends BaseWrapper
 
     public function getSetterType(string $name) {
         $prop = new PropertyTokenizer($name);
-        if ($prop->hasNext()) {
+        if ($prop->valid()) {
             $metaValue = $metaObject->metaObjectForProperty($prop->getIndexedName());
             if ($metaValue->getOriginalObject() instanceof NullObject) {
                 return "object";
@@ -85,7 +85,7 @@ class ArrayWrapper extends BaseWrapper
     
     public function getGetterType(string $name) {
         $prop = new PropertyTokenizer($name);
-        if ($prop->hasNext()) {
+        if ($prop->valid()) {
             $metaValue = $metaObject->metaObjectForProperty($prop->getIndexedName());
             if ($metaValue->getOriginalObject() instanceof NullObject) {
                 return "object";
