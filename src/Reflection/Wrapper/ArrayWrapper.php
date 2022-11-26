@@ -65,6 +65,42 @@ class ArrayWrapper extends BaseWrapper
         return array_keys($this->map);
     }
 
+    public function getSetterType(string $name) {
+        $prop = new PropertyTokenizer($name);
+        if ($prop->hasNext()) {
+            $metaValue = $metaObject->metaObjectForProperty($prop->getIndexedName());
+            if ($metaValue->getOriginalObject() instanceof NullObject) {
+                return "object";
+            } else {
+                return $metaValue->getSetterType($prop->getChildren());
+            }
+        } else {
+            if ((is_array($this->map) && array_key_exists($name, $this->map)) || ($this->map instanceof \ArrayObject && array_key_exists($name, $this->map->getArrayCopy()))) {
+                return is_object($map[$name]) ? get_class($map[$name]) : gettype($map[$name]);
+            } else {
+                return "object";
+            }
+        }
+    }
+    
+    public function getGetterType(string $name) {
+        $prop = new PropertyTokenizer($name);
+        if ($prop->hasNext()) {
+            $metaValue = $metaObject->metaObjectForProperty($prop->getIndexedName());
+            if ($metaValue->getOriginalObject() instanceof NullObject) {
+                return "object";
+            } else {
+                return $metaValue->getGetterType($prop->getChildren());
+            }
+        } else {
+            if ((is_array($this->map) && array_key_exists($name, $this->map)) || ($this->map instanceof \ArrayObject && array_key_exists($name, $this->map->getArrayCopy()))) {
+                return is_object($map[$name]) ? get_class($map[$name]) : gettype($map[$name]);
+            } else {
+                return "object";
+            }
+        }
+    }
+
     public function add($element): void
     {
         $this->map[] = $element;
