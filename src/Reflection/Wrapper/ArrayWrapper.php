@@ -27,11 +27,16 @@ class ArrayWrapper extends BaseWrapper
             return $this->getCollectionValue($prop, $collection);
         } else {
             $key = $prop->getName();
-            if ((is_array($this->map) && array_key_exists($key, $this->map)) || ($this->map instanceof \ArrayObject && array_key_exists($key, $this->map->getArrayCopy()))) {
+            if ($this->containsKey($key)) {
                 return $this->map[$key];
             }
             return null;
         }
+    }
+
+    private function containsKey(string $key): bool
+    {
+        return (is_array($this->map) && array_key_exists($key, $this->map)) || ($this->map instanceof \ArrayObject && array_key_exists($key, $this->map->getArrayCopy()));
     }
 
     public function set(PropertyTokenizer $prop, &$value): void
@@ -75,7 +80,7 @@ class ArrayWrapper extends BaseWrapper
                 return $metaValue->getSetterType($prop->getChildren());
             }
         } else {
-            if ((is_array($this->map) && array_key_exists($name, $this->map)) || ($this->map instanceof \ArrayObject && array_key_exists($name, $this->map->getArrayCopy()))) {
+            if ($this->containsKey($name)) {
                 return is_object($map[$name]) ? get_class($map[$name]) : gettype($map[$name]);
             } else {
                 return "object";
@@ -93,7 +98,7 @@ class ArrayWrapper extends BaseWrapper
                 return $metaValue->getGetterType($prop->getChildren());
             }
         } else {
-            if ((is_array($this->map) && array_key_exists($name, $this->map)) || ($this->map instanceof \ArrayObject && array_key_exists($name, $this->map->getArrayCopy()))) {
+            if ($this->containsKey($name)) {
                 return is_object($map[$name]) ? get_class($map[$name]) : gettype($map[$name]);
             } else {
                 return "object";
@@ -120,7 +125,7 @@ class ArrayWrapper extends BaseWrapper
     {
         $prop = new PropertyTokenizer($name);
         if ($prop->valid()) {
-            if (array_key_exists($prop->getIndexedName(), $this->map)) {
+            if ($this->containsKey($prop->getIndexedName())) {
                 $metaValue = $this->metaObject->metaObjectForProperty($prop->getIndexedName());
                 if ($metaValue->getOriginalObject() instanceof NullObject) {
                     return true;
@@ -131,7 +136,7 @@ class ArrayWrapper extends BaseWrapper
                 return false;
             }
         } else {
-            return array_key_exists($prop->getName(), $this->map);
+            return $this->containsKey($prop->getName());
         }
     }
 
