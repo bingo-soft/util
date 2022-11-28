@@ -27,8 +27,10 @@ class ArrayWrapper extends BaseWrapper
             return $this->getCollectionValue($prop, $collection);
         } else {
             $key = $prop->getName();
-            if ($this->containsKey($key)) {
+            if (is_array($this->map) && array_key_exists($key, $this->map)) {
                 return $this->map[$key];
+            } elseif ($this->map instanceof \ArrayObject && method_exists($this->map, 'get')) {
+                return $this->map->get($key);
             }
             return null;
         }
