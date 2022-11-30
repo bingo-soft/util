@@ -101,7 +101,7 @@ class ArrayWrapper extends BaseWrapper
             }
         } else {
             if ($this->containsKey($name)) {
-                return is_object($map[$name]) ? get_class($map[$name]) : gettype($map[$name]);
+                return is_object($this->map[$name]) ? get_class($this->map[$name]) : gettype($this->map[$name]);
             } else {
                 return "object";
             }
