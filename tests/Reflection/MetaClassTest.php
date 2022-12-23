@@ -110,4 +110,10 @@ class MetaClassTest extends TestCase
         $meta = new MetaClass(RichType::class);
         $this->assertEquals("richField", $meta->findProperty("RICHfield"));
     }
+
+    public function testClassWithAttributes(): void
+    {
+        $meta = new MetaClass(AttributesClass::class);
+        $this->assertEquals(ResourceClass::class, $meta->getGetterType("resources"));
+    }
 }

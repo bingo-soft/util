@@ -2,7 +2,7 @@
 
 namespace Tests\Reflection;
 
-use Util\Reflection\Generics\{
+use Util\Reflection\Attributes\{
     Params,
     Prop,
     Returns,

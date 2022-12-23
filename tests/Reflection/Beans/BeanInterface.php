@@ -2,7 +2,7 @@
 
 namespace Tests\Reflection\Beans;
 
-use Util\Reflection\Generics\{
+use Util\Reflection\Attributes\{
     Params,
     Returns,
     Template

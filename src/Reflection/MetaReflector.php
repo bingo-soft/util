@@ -2,11 +2,13 @@
 
 namespace Util\Reflection;
 
-use Util\Reflection\Generics\{
+use Util\Reflection\Attributes\{
     Impl,
+    ParametrizedType,
     Params,
     Prop,
-    Returns
+    Returns,
+    ResultType
 };
 use Util\Reflection\Invoker\{
     GetFieldInvoker,
@@ -134,13 +136,32 @@ class MetaReflector
         $this->getMethods[$name] = $invoker;
 
         $type = null;
-        $refType = $method->getReturnType();
-        if ($refType instanceof \ReflectionNamedType) {
-            $type = $refType->getName();
-        } elseif ($refType instanceof \ReflectionUnionType) {
-            $type = array_map(function($cur) {
-                return $cur->getName();
-            }, $refType->getTypes());
+        
+        $attrs = $method->getAttributes(ResultType::class);
+        if (!empty($attrs)) {
+            $result = $attrs[0]->newInstance();
+            $rvalue = $result->value();
+            if (is_string($rvalue)) {
+                $type = $rvalue;
+            } elseif ($rvalue instanceof ParametrizedType) {
+                $value = $rvalue->value();
+                if (is_string($value)) {
+                    $type = $value;
+                } elseif ($value instanceof ParametrizedType) {
+                    $type = $value->value();
+                }
+            }
+        }
+
+        if ($type === null) {
+            $refType = $method->getReturnType();
+            if ($refType instanceof \ReflectionNamedType) {
+                $type = $refType->getName();
+            } elseif ($refType instanceof \ReflectionUnionType) {
+                $type = array_map(function($cur) {
+                    return $cur->getName();
+                }, $refType->getTypes());
+            }
         }
         $this->getTypes[$name] = $type;
     }

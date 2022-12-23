@@ -2,7 +2,7 @@
 
 namespace Tests\Reflection;
 
-use Util\Reflection\Generics\Impl;
+use Util\Reflection\Attributes\Impl;
 
 #[Impl([EntityInterface::class => ["T" => "int"]])]
 class AbstractEntity implements EntityInterface

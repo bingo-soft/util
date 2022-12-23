@@ -5,7 +5,7 @@ namespace Tests\Reflection;
 use PHPUnit\Framework\TestCase;
 use Util\Reflection\MetaObject;
 
-class GenericsTest extends TestCase
+class AttributesTest extends TestCase
 {
     public function testTypeErrorNotThrownWhenStrictTypeCheckingNotSet(): void
     {
