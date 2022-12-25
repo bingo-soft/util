@@ -137,32 +137,15 @@ class MetaReflector
 
         $type = null;
         
-        $attrs = $method->getAttributes(ResultType::class);
-        if (!empty($attrs)) {
-            $result = $attrs[0]->newInstance();
-            $rvalue = $result->value();
-            if (is_string($rvalue)) {
-                $type = $rvalue;
-            } elseif ($rvalue instanceof ParametrizedType) {
-                $value = $rvalue->value();
-                if (is_string($value)) {
-                    $type = $value;
-                } elseif ($value instanceof ParametrizedType) {
-                    $type = $value->value();
-                }
-            }
+        $refType = $method->getReturnType();
+        if ($refType instanceof \ReflectionNamedType) {
+            $type = $refType->getName();
+        } elseif ($refType instanceof \ReflectionUnionType) {
+            $type = array_map(function($cur) {
+                return $cur->getName();
+            }, $refType->getTypes());
         }
-
-        if ($type === null) {
-            $refType = $method->getReturnType();
-            if ($refType instanceof \ReflectionNamedType) {
-                $type = $refType->getName();
-            } elseif ($refType instanceof \ReflectionUnionType) {
-                $type = array_map(function($cur) {
-                    return $cur->getName();
-                }, $refType->getTypes());
-            }
-        }
+        
         $this->getTypes[$name] = $type;
     }
 
