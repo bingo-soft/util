@@ -81,10 +81,13 @@ class MetaClass extends \ReflectionClass
         return $builder;
     }
 
-    private function metaClassForProperty(/*string|PropertyTokenizer*/$prop): MetaClass
+    private function metaClassForProperty(/*string|PropertyTokenizer*/$prop): ?MetaClass
     {
         $propType = $this->getGetterType($prop);
-        return new MetaClass($propType);
+        if (class_exists($propType)) {
+            return new MetaClass($propType);
+        }
+        return null;
     }
 
     public function getGetterNames(): array
@@ -103,10 +106,11 @@ class MetaClass extends \ReflectionClass
         if ($prop->valid()) {
             if ($this->reflector->hasSetter($prop->getName())) {
                 $metaProp = $this->metaClassForProperty($prop->getName());
-                return $metaProp->hasSetter($prop->getChildren());
-            } else {
-                return false;
+                if ($metaProp !== null) {
+                    return $metaProp->hasSetter($prop->getChildren());
+                }
             }
+            return false;
         } else {
             return $this->reflector->hasSetter($prop->getName());
         }
@@ -118,10 +122,11 @@ class MetaClass extends \ReflectionClass
         if ($prop->valid()) {
             if ($this->reflector->hasGetter($prop->getName())) {
                 $metaProp = $this->metaClassForProperty($prop);
-                return $metaProp->hasGetter($prop->getChildren());
-            } else {
-                return false;
+                if ($metaProp !== null) {
+                    return $metaProp->hasGetter($prop->getChildren());
+                }
             }
+            return false;
         } else {
             return $this->reflector->hasGetter($prop->getName());
         }
