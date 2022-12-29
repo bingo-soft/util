@@ -61,12 +61,16 @@ class ObjectWrapper extends BaseWrapper
 
     private function getObjectProperty(PropertyTokenizer $prop, $object)
     {
-        $propertyName = $this->findProperty($prop->getName());
-        $prop = $this->metaObject->getProperty($propertyName);
-        if ($prop->isPrivate() || $prop->isProtected()) {
-            $prop->setAccessible(true);
+        try {
+            $method = $this->metaClass->getGetInvoker($prop->getName());
+            try {
+                return $method->invoke($object, []);
+            } catch (\Throwable $t) {
+                throw $t;
+            }
+        } catch (\Exception $t) {
+            throw new \ReflectionException("Could not get property '" . $prop->getName() . "'. Cause: " . $t->getMessage());
         }
-        return $prop->getValue($object);
     }
 
     private function setObjectProperty(PropertyTokenizer $prop, $object, $value)
