@@ -158,14 +158,16 @@ class MetaReflector
 
         //from method argument
         $params = $method->getParameters();
-        $refType = $params[0]->getType();
-     
-        if ($refType instanceof \ReflectionNamedType) {
-            $type = $refType->getName();
-        } elseif ($refType instanceof \ReflectionUnionType) {
-            $type = array_map(function($cur) {
-                return $cur->getName();
-            }, $refType->getTypes());
+
+        if (!empty($params)) {
+            $refType = $params[0]->getType();     
+            if ($refType instanceof \ReflectionNamedType) {
+                $type = $refType->getName();
+            } elseif ($refType instanceof \ReflectionUnionType) {
+                $type = array_map(function($cur) {
+                    return $cur->getName();
+                }, $refType->getTypes());
+            }
         }
 
         //from class property type

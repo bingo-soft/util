@@ -9,6 +9,12 @@ class RichType
     private $richProperty;
     private $richMap = [];
     private $richList = ["bar"];
+    private bool $isWithoutDueDate = false;
+
+    public function isWithoutDueDate(): bool
+    {
+        return $this->isWithoutDueDate;
+    }
 
     public function getRichType(): ?RichType
     {

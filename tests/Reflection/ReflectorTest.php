@@ -3,6 +3,7 @@
 namespace Tests\Reflection;
 
 use PHPUnit\Framework\TestCase;
+use Tests\Domain\Misc\RichType;
 use Tests\Reflection\Beans\{
     BeanClass1,
     BeanClass2
@@ -82,5 +83,12 @@ class ReflectorTest extends TestCase
         $this->assertEquals(["string", "int", "bool"], $reflector->getSetterType("prop2"));
         $ambiguousInvoker = $reflector->getSetInvoker("prop2");
         $ambiguousInvoker->invoke(new BeanClass2(), [ 1 ]);
+    }
+
+    public function testBooleanField(): void
+    {
+        $reflectorFactory = new DefaultReflectorFactory();
+        $reflector = $reflectorFactory->findForClass(RichType::class);     
+        $this->assertEquals("bool", $reflector->getGetterType("withoutDueDate"));
     }
 }

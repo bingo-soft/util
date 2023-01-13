@@ -268,6 +268,7 @@ class MetaObjectTest extends TestCase
         $meta = SystemMetaObject::forObject($rich);
         $meta->setValue("richType.richField", "foo");
         $meta->setValue("richType.richType.richField", "foo");
+        $this->assertFalse($meta->getValue("withoutDueDate"));
         $this->assertTrue($meta->isPropertyInitialized("richType.richField"));
         $this->assertTrue($meta->isPropertyInitialized("richType.richType.richField"));
         $this->assertFalse($meta->isPropertyInitialized("richType.richType.richType.richField"));
