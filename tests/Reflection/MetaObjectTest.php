@@ -18,7 +18,7 @@ class MetaObjectTest extends TestCase
         $obj = new TestClass();
         $ref = new MetaObject($obj);
         $this->assertSame($obj, $ref->getOriginalObject());
-        $this->assertTrue($ref->getOriginalObject() instanceof \Serializable);
+        $this->assertTrue(method_exists($ref->getOriginalObject(), '__serialize'));
     }
 
     public function testShouldGetAndSetField(): void
@@ -106,7 +106,7 @@ class MetaObjectTest extends TestCase
         $rich = new RichType();
         $meta = SystemMetaObject::forObject($rich);
         $readables = $meta->getGetterNames();
-        $this->assertCount(5, $readables);
+        $this->assertCount(7, $readables);
         foreach ($readables as $readable) {
             $this->assertTrue($meta->hasGetter($readable));
             $this->assertTrue($meta->hasGetter("richType." . $readable));
@@ -119,7 +119,7 @@ class MetaObjectTest extends TestCase
         $rich = new RichType();
         $meta = SystemMetaObject::forObject($rich);
         $writeables = $meta->getSetterNames();
-        $this->assertCount(5, $writeables);
+        $this->assertCount(6, $writeables);
         foreach ($writeables as $writeable) {
             $this->assertTrue($meta->hasSetter($writeable));
             $this->assertTrue($meta->hasSetter("richType." . $writeable));

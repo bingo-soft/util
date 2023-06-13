@@ -101,8 +101,8 @@ class MetaClassTest extends TestCase
     public function testShouldCheckGetterAndSetterNames(): void
     {
         $meta = new MetaClass(RichType::class);
-        $this->assertCount(5, $meta->getGetterNames());
-        $this->assertCount(5, $meta->getSetterNames());
+        $this->assertCount(7, $meta->getGetterNames());
+        $this->assertCount(6, $meta->getSetterNames());
     }
 
     public function testShouldFindPropertyName(): void

@@ -2,7 +2,7 @@
 
 namespace Tests\Domain\Blog;
 
-class Author implements \Serializable
+class Author
 {
     protected $id;
     protected $username;
@@ -21,27 +21,26 @@ class Author implements \Serializable
         $this->favouriteSection = $section;
     }
 
-    public function serialize()
+    public function __serialize(): array
     {
-        return json_encode([
+        return [
             'id' => $this->id,
             'username' => $this->username,
             'password' => $this->password,
             'email' => $this->email,
             'bio' => $this->bio,
             'favouriteSection' => $this->favouriteSection
-        ]);
+        ];
     }
 
-    public function unserialize($data)
+    public function __unserialize(array $data): void
     {
-        $json = json_decode($data);
-        $this->id = $json->id;
-        $this->username = $json->username;
-        $this->password = $json->password;
-        $this->email = $json->email;
-        $this->bio = $json->bio;
-        $this->favouriteSection = $json->favouriteSection;
+        $this->id = $data['id'];
+        $this->username = $data['username'];
+        $this->password = $data['password'];
+        $this->email = $data['email'];
+        $this->bio = $data['bio'];
+        $this->favouriteSection = $data['favouriteSection'];
     }
 
     public function setId(int $id): void
