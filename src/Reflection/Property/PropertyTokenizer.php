@@ -52,13 +52,17 @@ class PropertyTokenizer extends \ArrayIterator
         return $this->children !== null;
     }
 
-    public function current()
+    public function current(): mixed
     {
         return $this;
     }
 
-    public function next()
+    public function next(): void
     {
-        return new PropertyTokenizer($this->children);
+        $next = new PropertyTokenizer($this->children);
+        $this->name = $next->name;
+        $this->indexedName = $next->indexedName;
+        $this->index = $next->index;
+        $this->children = $next->children;
     }
 }
