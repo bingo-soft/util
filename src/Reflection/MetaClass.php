@@ -84,7 +84,7 @@ class MetaClass extends \ReflectionClass
     private function metaClassForProperty(/*string|PropertyTokenizer*/$prop): ?MetaClass
     {
         $propType = $this->getGetterType($prop);
-        if (class_exists($propType)) {
+        if ($propType !== null && class_exists($propType)) {
             return new MetaClass($propType);
         }
         return null;
