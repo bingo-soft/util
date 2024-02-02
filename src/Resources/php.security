@@ -1,0 +1,6 @@
+networkaddress.cache.ttl=30
+networkaddress.cache.negative.ttl=10
+networkaddress.preferIPv6Addresses=0
+nameservice.provider.1=default
+file.encoding=UTF-8
+net.maxDatagramSockets=100
