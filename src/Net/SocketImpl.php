@@ -18,7 +18,7 @@ abstract class SocketImpl implements SocketOptionsInterface
     /**
      * The IP address of the remote end of this socket.
      */
-    protected $address;
+    public $address;
 
     /**
      * The port number on the remote host to which this socket is connected.
@@ -33,7 +33,7 @@ abstract class SocketImpl implements SocketOptionsInterface
     /**
      * Creates either a stream or a datagram socket.
      */
-    abstract protected function create(...$args): void;
+    abstract public function create(bool $isServer, bool $stream, InetAddress $host, int $port): void;
 
     /**
      * Binds this socket to the specified local IP address and port number.
@@ -62,7 +62,7 @@ abstract class SocketImpl implements SocketOptionsInterface
      * @exception  IOException  if an I/O error occurs when accepting the
      *               connection.
      */
-    abstract protected function accept(SocketImpl $s): void;
+    abstract protected function accept(SocketImpl $s);
 
     /**
      * Returns the number of bytes that can be read from this socket
@@ -141,7 +141,7 @@ abstract class SocketImpl implements SocketOptionsInterface
      * @return  the value of this socket's {@code address} field.
      * @see     java.net.SocketImpl#address
      */
-    protected function getInetAddress(): InetAddress
+    protected function getInetAddress(): ?InetAddress
     {
         return $this->address;
     }

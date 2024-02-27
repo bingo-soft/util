@@ -46,7 +46,7 @@ class ResourceManager
     public static function beforeUdpCreate(): void
     {
         self::$numSockets += 1;
-        if (self::$numSockets > self::$maxSockets) {
+        if (self::$maxSockets !== null && self::$numSockets > self::$maxSockets) {
             self::$numSockets -= 1;
             throw new \Exception("maximum number of DatagramSockets reached");
         }

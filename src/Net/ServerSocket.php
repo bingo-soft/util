@@ -11,6 +11,9 @@ class ServerSocket
     private bool $bound = false;
     private bool $closed = false;
     private $closeLock = null;
+    
+    private $endpoint;
+    private $backlog;
 
     /**
      * The implementation of this Socket.
@@ -40,7 +43,8 @@ class ServerSocket
                 $backlog = 50;
             }
             try {
-                $this->bind(new InetSocketAddress($args[3], $args[0]), $backlog);
+                $address = new InetSocketAddress($args[2], $args[0]);
+                $this->bind(new InetSocketAddress($args[2], $args[0]), $backlog);
             } catch (\Throwable $e) {
                 $this->close();
                 throw $e;
@@ -66,12 +70,13 @@ class ServerSocket
 
     private function setImpl(): void
     {
+        //@TODO - SocksSocketImpl to be implemented
         $this->impl = new SocksSocketImpl();
         $this->impl->setServerSocket($this);
     }
 
     /**
-     * Creates the socket implementation.
+     * Creates the server socket implementation.
      *
      * @throws IOException if creation fails
      * @since 1.4
@@ -81,7 +86,7 @@ class ServerSocket
         if ($this->impl == null) {
             $this->setImpl();
         }
-        $this->impl->create(true);
+        $this->impl->create(true, true, $this->endpoint->getAddress(), $this->endpoint->getPort());
         $this->created = true;
     }
 
@@ -118,13 +123,16 @@ class ServerSocket
         if ($this->isBound()) {
             throw new \Exception("Already bound");
         }
-        if ($endpoint == null) {
-            $endpoint = new InetSocketAddress(0);
+        if ($this->endpoint === null && $endpoint === null) {
+            $this->endpoint = new InetSocketAddress(0);
+        } elseif ($this->endpoint === null && $endpoint !== null) {
+            $this->endpoint = $endpoint;
         }
-        if (!($endpoint instanceof InetSocketAddress)) {
+
+        if (!($this->endpoint instanceof InetSocketAddress)) {
             throw new \Exception("Unsupported address type");
         }
-        $epoint = $endpoint;
+        $epoint = $this->endpoint;
         if ($epoint->isUnresolved()) {
             throw new \Exception("Unresolved address");
         }
@@ -132,8 +140,10 @@ class ServerSocket
             $backlog = 50;
         }
         try {
-            $this->getImpl()->bind($epoint->getAddress(), $epoint->getPort());
-            $this->getImpl()->listen($backlog);
+            //raw server socket is already bound to url and starts listening
+            //$this->getImpl()->bind($epoint->getAddress(), $epoint->getPort());
+            //$this->getImpl()->listen($backlog);
+            $this->getImpl();
             $this->bound = true;
         } catch(\Throwable $e) {
             $this->bound = false;
@@ -269,6 +279,7 @@ class ServerSocket
         if (!$this->isBound()) {
             throw new \Exception("Socket is not bound yet");
         }
+        //Client socket is created
         $s = new Socket(null);
         $this->implAccept($s);
         return $s;
@@ -295,12 +306,12 @@ class ServerSocket
         $si = null;
         try {
             if ($s->impl == null) {
-              $s->setImpl();
+                $s->setImpl();
             } else {
                 $s->impl->reset();
             }
             $si = $s->impl;
-            $s->impl = null;
+            $s->impl = null;            
             $si->address = new InetAddress();
             $this->getImpl()->accept($si);
         } catch (\Throwable $e) {

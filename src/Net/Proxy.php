@@ -36,8 +36,8 @@ class Proxy
             if (($args[0] == ProxyType::DIRECT) || !($args[1] instanceof InetSocketAddress)) {
                 throw new \Exception("type " . $args[0] . " is not compatible with address " . $args[1]);
             }
-            $this->type = $type;
-            $this->sa = $sa;
+            $this->type = $args[0];
+            $this->sa = $args[1];
         }
     }
 

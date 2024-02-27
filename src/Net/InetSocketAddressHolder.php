@@ -30,19 +30,19 @@ class InetSocketAddressHolder
 
     public function getHostName(): ?string
     {
-        if ($this->hostname != null)
+        if ($this->hostname !== null)
             return $this->hostname;
-        if ($this->addr != null)
+        if ($this->addr !== null)
             return $this->addr->getHostName();
         return null;
     }
 
     public function getHostString(): ?string
     {
-        if ($this->hostname != null)
+        if ($this->hostname !== null)
             return $this->hostname;
-        if ($this->addr != null) {
-            if ($this->addr->holder()->getHostName() != null) {
+        if ($this->addr !== null) {
+            if ($this->addr->holder()->getHostName() !== null) {
                 return $this->addr->holder()->getHostName();
             } else {
                 return $this->addr->getHostAddress();
@@ -53,7 +53,7 @@ class InetSocketAddressHolder
 
     public function isUnresolved(): bool
     {
-        return $this->addr == null;
+        return $this->addr === null;
     }
   
     public function __toString(): string
@@ -67,16 +67,16 @@ class InetSocketAddressHolder
 
     public function equals($obj): bool
     {
-        if ($obj == null || !($obj instanceof InetSocketAddressHolder)) {
+        if ($obj === null || !($obj instanceof InetSocketAddressHolder)) {
             return false;
         }
         $sameIP = false;
-        if ($this->addr != null) {
+        if ($this->addr !== null) {
             $sameIP = $this->addr == $obj->addr;
-        } elseif ($this->hostname != null) {
-            $sameIP = $obj->addr == null && strtolower($this->hostname) == strtolower($obj->hostname);
+        } elseif ($this->hostname !== null) {
+            $sameIP = $obj->addr === null && strtolower($this->hostname) == strtolower($obj->hostname);
         } else {
-            $sameIP = $obj->addr == null && $obj->hostname == null;
+            $sameIP = $obj->addr === null && $obj->hostname === null;
         }
         return $sameIP && $this->port == $obj->port;
     }

@@ -27,10 +27,10 @@ class InetSocketAddress extends SocketAddress
         if (count($args) == 1 && is_int($args[0])) {
             self::__construct(InetAddress::anyLocalAddress(), $args[0]);
         } elseif (count($args) == 2) {
-            if ($args[0] instanceof InetAddress) {
+            if ($args[0] instanceof InetAddress || $args[0] === null) {
                 $this->holder = new InetSocketAddressHolder(
                     null,
-                    $args[0],
+                    $args[0] ?? InetAddress::anyLocalAddress(),
                     self::checkPort($args[1])
                 );
             } elseif (is_string($args[0])) {

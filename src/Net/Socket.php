@@ -14,6 +14,8 @@ class Socket
     private $closeLock;
     private bool $shutIn = false;
     private bool $shutOut = false;
+    
+    private $endpoint;
 
     /**
      * The implementation of this Socket.
@@ -25,17 +27,16 @@ class Socket
             $this->setImpl();
         } elseif (count($args) == 1 && $args[0] instanceof Proxy) {
             $proxy = $args[0];
-            $p = $proxy == Proxy::noProxy() ? Proxy::noProxy() : ApplicationProxy::create($proxy);
+            $p = ($proxy == Proxy::noProxy()) ? Proxy::noProxy() : ApplicationProxy::create($proxy);
             $type = $p->type();
             if ($type == ProxyType::SOCKS || $type == ProxyType::HTTP) {
-                //$epoint = $p->address();
-                //if ($epoint->getAddress() != null) {
-                //    $this->checkAddress($epoint->getAddress(), "Socket");
-                //}
-                //$this->impl = $type == ProxyType::SOCKS ? new SocksSocketImpl($p) : new HttpConnectSocketImpl($p);
-                //$this->impl->setSocket($this);
-                //@TODO - SocksSocketImpl and HttpConnectSocketImpl
-                throw new \Exception("Not yet implemented");
+                $this->endpoint = $p->address();
+                if ($this->endpoint->getAddress() !== null) {
+                    $this->checkAddress($this->endpoint->getAddress(), "Socket");
+                }
+                $this->impl = ($type == ProxyType::SOCKS) ? new SocksSocketImpl($p) : new HttpConnectSocketImpl($p);
+                $this->impl->setSocket($this);
+                //@TODO - HttpConnectSocketImpl is yet to be implemented
             } else {
                 if ($p == Proxy::noProxy()) {
                     if (self::$factory == null) {
@@ -52,7 +53,8 @@ class Socket
             $this->impl = $args[0];
             $this->impl->setSocket($this);
         } elseif (count($args) == 2) {
-            self::__construct(new InetSocketAddress($args[0], $args[1]), null, true);
+            $this->endpoint = new InetSocketAddress($args[0], $args[1]);
+            self::__construct($this->endpoint, null, true);
         } elseif (count($args) == 3 && is_bool($args[2])) {
             $this->setImpl();
             try {
@@ -70,7 +72,8 @@ class Socket
                 throw $e;
             }
         } elseif (count($args) == 4) {
-            self::__construct(new InetSocketAddress($args[0], $args[1]), new InetSocketAddress($args[3], $args[4]), true);
+            $this->endpoint = new InetSocketAddress($args[0], $args[1]);
+            self::__construct($this->endpoint, new InetSocketAddress($args[3], $args[4]), true);
         }
     }
 
@@ -87,7 +90,7 @@ class Socket
         if ($this->impl == null) {
             $this->setImpl();
         }
-        $this->impl->create($stream);
+        $this->impl->create(false, $stream, $this->endpoint->getAddress(), $this->endpoint->getPort());
         $this->created = true;
     }
 
@@ -119,7 +122,8 @@ class Socket
     public function getImpl(): SocketImpl
     {
         if (!$this->created) {
-            $this->createImpl(true);
+            //client stream socket
+            $this->createImpl(false, true);
         }
         return $this->impl;
     }
@@ -169,9 +173,9 @@ class Socket
         $this->checkAddress($addr, "connect");
 
         if (!$this->created) {
-            $this->createImpl(true);
+            $this->createImpl(true, $addr, $port);
         }
-        $impl->connect($epoint, $timeout);
+        $this->impl->connect($epoint, $timeout);
         $this->connected = true;
         /*
          * If the socket was not bound before the connect, it is now because
@@ -1087,5 +1091,15 @@ class Socket
             throw new \Exception("factory already defined");
         }
         self::$factory = $fac;
+    }
+
+    public function write(string $buffer, int $length = null)
+    {
+        $this->impl->write($buffer, $length);
+    }
+
+    public function read(int $length, int $type = PHP_BINARY_READ)
+    {
+        return $this->impl->read($length, $type);
     }
 }

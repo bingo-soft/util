@@ -33,20 +33,22 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
      * Creates a socket with a boolean that specifies whether this
      * is a stream socket (true) or an unconnected UDP socket (false).
      */
-    protected function create(bool $stream): void
+    public function create(bool $isServer, bool $stream, InetAddress $host, int $port): void
     {
         $this->stream = $stream;
-        if (!$stream) {
+        if ($isServer == false) {
             ResourceManager::beforeUdpCreate();
             try {
-                $this->fd = $this->socketCreate(false);
+                $this->fd = $this->socketCreate(false, $stream, $host, $port);
             } catch (\Throwable $ioe) {
                 ResourceManager::afterUdpClose();
                 $this->fd = null;
                 throw $ioe;
             }
         } else {
-            $this->fd = $this->socketCreate(true);
+            //We are creating server socket that will listen for connections
+            $this->stream = $stream;
+            $this->fd = $this->socketCreate($isServer, $stream, $host, $port);
         }
         if ($this->socket != null) {
             $this->socket->setCreated();
@@ -186,7 +188,7 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
      * @param address the address
      * @param lport the port
      */
-    protected function bind(InetAddress $address, int $lport): void
+    public function bind(InetAddress $address, int $lport): void
     {
         /*if (!closePending && (socket == null || !socket.isBound())) {
             NetHooks.beforeTcpBind(fd, address, lport);
@@ -204,7 +206,7 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
      * Listens, for a specified amount of time, for connections.
      * @param count the amount of time to listen for connections
      */
-    protected function listen(int $count): void
+    public function listen(int $count): void
     {
         $this->socketListen($count);
     }
@@ -213,7 +215,7 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
      * Accepts connections.
      * @param s the connection
      */
-    protected function accept(SocketImpl $s): void
+    public function accept(SocketImpl $s): void
     {
         $this->acquireFD();
         try {
@@ -486,7 +488,12 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
         return $this->timeout;
     }
 
-    abstract public function socketCreate(bool $isServer);
+    public function isStream(): bool
+    {
+        return $this->stream;
+    }
+
+    abstract public function socketCreate(bool $isServer, bool $stream, InetAddress $address, int $port);
     abstract public function socketConnect(InetAddress $address, int $port, ?int $timeout = null): void;
     abstract public function socketBind(InetAddress $address, int $port): void;
     abstract public function socketListen(int $count = 0): void;
@@ -496,7 +503,7 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
     //abstract public function socketShutdown(int $howto): void;
     abstract public function socketSetOption(int $opt, $value, int $level = SOL_SOCKET): void;
     abstract public function socketGetOption(int $opt, int $level = SOL_SOCKET);
-    abstract public function read(int $length, int $type = PHP_BINARY_READ): string;
+    abstract public function read(int $length, int $type = PHP_BINARY_READ);
     abstract public function receive(string &$buffer, int $length, int $flags): int;
     abstract public function write(string $buffer, int $length = null);
     abstract public function send(string $buffer, int $flags = 0, int $length = null);
