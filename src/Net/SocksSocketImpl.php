@@ -10,7 +10,7 @@ class SocksSocketImpl extends PlainSocketImpl implements SocksConstsInterface
     private $serverPort = self::DEFAULT_PORT;
     private $externalAddress;
     private $useV4 = false;
-    private $mdsock = null;
+    private $cmdsock = null;
     /* true if the Proxy has been set programatically */
     private bool $applicationSetProxy = false;
     private static $props = [];

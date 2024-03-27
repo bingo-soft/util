@@ -39,6 +39,10 @@ class DefaultProxySelector extends ProxySelector
 
     private static $hasSystemProxies = false;
 
+    private $proto;
+    private $nprop;
+    private $urlhost;
+
     /**
      * select() method. Where all the hard work is done.
      * Build a list of proxies depending on URI.
@@ -69,9 +73,9 @@ class DefaultProxySelector extends ProxySelector
         /**
          * Let's check the System properties for that protocol
          */
-        $proto = $protocol;
-        $nprop = $pinfo;
-        $urlhost = strtolower($host);
+        $this->proto = $protocol;
+        $this->nprop = $pinfo;
+        $this->urlhost = strtolower($host);
 
         /**
          * This is one big doPrivileged call, but we're trying to optimize
@@ -79,7 +83,7 @@ class DefaultProxySelector extends ProxySelector
          * System properties it does help having only 1 call to doPrivileged.
          * Be mindful what you do in here though!
          */
-        $proxyl[] = $this->getProxy($urlhost, $defProps);
+        $proxyl[] = $this->getProxy($this->urlhost, $defProps);
 
         /*
          * If no specific property was set for that URI, we should be
@@ -97,7 +101,7 @@ class DefaultProxySelector extends ProxySelector
 
         // Then let's walk the list of protocols in our array
         for ($i = 0; $i < count(self::$props); $i += 1) {
-            if (strtolower($props[$i][0]) == strtolower($proto)) {
+            if (strtolower(self::$props[$i][0]) == strtolower($this->proto)) {
                 for ($j = 1; $j < count(self::$props[$i]); $j += 1) {
                     /* System.getProp() will give us an empty
                      * String, "" for a defined but "empty"
@@ -113,14 +117,14 @@ class DefaultProxySelector extends ProxySelector
                 }
                 // If a Proxy Host is defined for that protocol
                 // Let's get the NonProxyHosts property
-                if ($nprop !== null) {
-                    $nphosts = NetProperties::get($nprop->property, $defProps);
+                if ($this->nprop !== null) {
+                    $nphosts = NetProperties::get($this->nprop->property, $defProps);
                     if ($nphosts == null) {
-                        if ($nprop->defaultVal !== null) {
-                            $nphosts = $nprop->defaultVal;
+                        if ($this->nprop->defaultVal !== null) {
+                            $nphosts = $this->nprop->defaultVal;
                         } else {
-                            $nprop->hostsSource = null;
-                            $nprop->hostsPool = null;
+                            $this->nprop->hostsSource = null;
+                            $this->nprop->hostsPool = null;
                         }
                     } elseif (strlen($nphosts) != 0) {
                         // add the required default patterns
@@ -129,16 +133,16 @@ class DefaultProxySelector extends ProxySelector
                         $nphosts .= "|" . NonProxyInfo::defStringVal;
                     }
                     if ($nphosts !== null) {
-                        if ($nphosts != $nprop->hostsSource) {
+                        if ($nphosts != $this->nprop->hostsSource) {
                             $pool = array_map(function ($val) {
                                 return strtolower($val);
                             }, explode("|", $nphosts));
-                            $nprop->hostsPool = $pool;
-                            $nprop->hostsSource = $nphosts;
+                            $this->nprop->hostsPool = $pool;
+                            $this->nprop->hostsSource = $nphosts;
                         }
                     }
-                    if ($nprop->hostsPool !== null) {
-                        foreach ($nprop->hostsPool as $match) {
+                    if ($this->nprop->hostsPool !== null) {
+                        foreach ($this->nprop->hostsPool as $match) {
                             if (preg_match('/' . $match . '/im', $urlhost)) {
                                 return Proxy::noProxy();
                             }
@@ -148,23 +152,23 @@ class DefaultProxySelector extends ProxySelector
                 // We got a host, let's check for port
 
                 $pport = intval(NetProperties::get(self::$props[$i][$j] . "Port", $defProps, 0));
-                if ($pport == 0 && $j < (strlen($props[$i]) - 1)) {
+                if ($pport == 0 && $j < (count(self::$props[$i]) - 1)) {
                     // Can't find a port with same prefix as Host
                     // AND it's not a SOCKS proxy
                     // Let's try the other prefixes for that proto
-                    for ($k = 1; $k < (strlen($props[$i]) - 1); $k += 1) {
+                    for ($k = 1; $k < (count(self::$props[$i]) - 1); $k += 1) {
                         if (($k != $j) && ($pport == 0)) {
-                            $pport = intval(NetProperties::get($props[$i][$k] . "Port", $defProps, 0));
+                            $pport = intval(NetProperties::get(self::$props[$i][$k] . "Port", $defProps, 0));
                         }
                     }
                 }
 
                 // Still couldn't find a port, let's use default
                 if ($pport == 0) {
-                    if ($j == (strlen($props[$i]) - 1)) // SOCKS
+                    if ($j == (count(self::$props[$i]) - 1)) // SOCKS
                         $pport = $this->defaultPort("socket");
                     else {
-                        $pport = $this->defaultPort($proto);
+                        $pport = $this->defaultPort($this->proto);
                     }
                 }
                 // We did find a proxy definition.
@@ -172,7 +176,7 @@ class DefaultProxySelector extends ProxySelector
                 // as this will be done at connection time
                 $saddr = InetSocketAddress::createUnresolved($phost, $pport);
                 // Socks is *always* the last on the list.
-                if ($j == (strlen($props[$i]) - 1)) {
+                if ($j == (count(self::$props[$i]) - 1)) {
                     $version = intval(NetProperties::get(self::SOCKS_PROXY_VERSION, $defProps, 5));
                     return SocksProxy::create($saddr, $version);
                 } else {

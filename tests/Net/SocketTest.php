@@ -17,7 +17,7 @@ class SocketTest extends TestCase
     {
         $p0 = new InterruptibleProcess(function ($process) {
             $server = new \Swoole\Process(function ($process) {
-                $server = new ServerSocket(1081);
+                $server = new ServerSocket(1085);
                 $readClients = [];
                 $readData = [];
                 while ($client = $server->accept()) { //  stream_socket_accept($server)
@@ -46,7 +46,7 @@ class SocketTest extends TestCase
         $p0->start();
 
         $p2 = new InterruptibleProcess(function ($process) {
-            $s = new Socket("localhost", 1081);
+            $s = new Socket("localhost", 1085);
             $message = "w" . $process->pid. " ";
             $s->write($message, strlen($message));
             while($r = $s->read(8192)) {
@@ -65,7 +65,7 @@ class SocketTest extends TestCase
         $pid = $p2->pid;
   
         $p1 = new InterruptibleProcess(function ($process) use ($pid) {
-            $s = new Socket("localhost", 1081);
+            $s = new Socket("localhost", 1085);
             $message = $pid . ' ';
             $s->write($message, strlen($message));
             $s->close();
@@ -73,7 +73,7 @@ class SocketTest extends TestCase
         $p1->start();
 
         $p4 = new InterruptibleProcess(function ($process) {
-            $s = new Socket("localhost", 1081);
+            $s = new Socket("localhost", 1085);
             $message = "w" . $process->pid . " ";
             $s->write($message, strlen($message));
             while($r = $s->read(8192)) {
@@ -92,7 +92,7 @@ class SocketTest extends TestCase
         $pid = $p4->pid;
   
         $p5 = new InterruptibleProcess(function ($process) use ($pid) {
-            $s = new Socket("localhost", 1081);
+            $s = new Socket("localhost", 1085);
             $message = $pid . ' ';
             $s->write($message, strlen($message));
             $s->close();
@@ -104,28 +104,5 @@ class SocketTest extends TestCase
         $p2->wait();
         $p4->wait();
         $p5->wait();
-
-
-
-        /*$p1 = new \Swoole\Process(function () {
-            sleep(30);
-            $server = stream_socket_server("tcp://localhost:1081");
-            while ($client = stream_socket_accept($server)) {
-                fwrite(STDERR, "=== Client Connected ===\n");
-            }
-        });
-        $p1->start();
-
-        $p2 = new \Swoole\Process(function () {
-            $client = stream_socket_client("tcp://localhost:1081", $errorNo, $errorStr, 60000);
-            fwrite(STDERR, "Connection status: " . socket_strerror(socket_last_error()) . ", last error: $errorNo, $errorStr\n");
-            stream_socket_sendto($client, "=== Hello world ===");
-            stream_socket_shutdown($client, STREAM_SHUT_WR);
-        });
-        $p2->start();
-
-        $p1->wait();
-        $p2->wait();*/
-
     }
 }
