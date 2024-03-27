@@ -445,7 +445,7 @@ class InetAddress
         }
 
         // if host is an IP address, we won't do further lookup
-        $val = @hexdec($host[0]);
+        $val = ctype_xdigit($host[0]) ? hexdec($host[0]) : null;
         if (!(strtolower($host[0]) != '0' && $val == 0) || ($host[0] == ':')) {
             $numericZone = -1;
             $ifname = null;
