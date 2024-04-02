@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Swoole\Coroutine\Client;
 use function \Swoole\Coroutine\run;
 
-class SocketTest extends TestCase
+abstract class SocketTest extends TestCase
 {
     public function testMethods(): void
     {
