@@ -129,12 +129,43 @@ class PlainSocketImpl extends AbstractPlainSocketImpl
     }
 
     //@TODO - make length optional to read all data from the socket
-    public function read(int $length, int $type = PHP_BINARY_READ)
+    public function read(int $length, int $type = PHP_BINARY_READ, int $nanos = 0)
     {
         if ($this->fd instanceof \Socket) {
+            if ($nanos !== 0) {
+                $sec = intdiv($nanos, 1000000000);
+                $usec = intdiv(($nanos - ($sec * 1000000000)), 1000);
+                socket_set_option($this->fd, SOL_SOCKET, SO_RCVTIMEO, [
+                    "sec" => $sec, 
+                    "usec" => $usec
+                ]);
+            }
             return @socket_read($this->fd, $length, $type);
         } elseif (is_resource($this->fd)) {
-            return @stream_socket_recvfrom($this->fd, $length);
+            if ($nanos !== 0) {
+                $sec = intdiv($nanos, 1000000000);
+                $usec = intdiv(($nanos - ($sec * 1000000000)), 1000);
+
+                $read = [$this->fd];
+                $write = null;
+                $except = null;
+
+                // Use stream_select() to wait for the stream to become available or timeout
+                if (false === @stream_select($read, $write, $except, $sec, $usec)) {
+                    // stream_select() failed
+                    return false;
+                }
+
+                if (!empty($read)) {
+                    // The stream is ready for reading
+                    return @stream_socket_recvfrom($this->fd, $length);
+                }
+
+                return false;
+
+            } else {
+                return @stream_socket_recvfrom($this->fd, $length);
+            }
         }
         return false;
     }

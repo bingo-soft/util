@@ -503,7 +503,7 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
     //abstract public function socketShutdown(int $howto): void;
     abstract public function socketSetOption(int $opt, $value, int $level = SOL_SOCKET): void;
     abstract public function socketGetOption(int $opt, int $level = SOL_SOCKET);
-    abstract public function read(int $length, int $type = PHP_BINARY_READ);
+    abstract public function read(int $length, int $type = PHP_BINARY_READ, int $nanosTimeout = 0);
     abstract public function receive(string &$buffer, int $length, int $flags): int;
     abstract public function write(string $buffer, int $length = null);
     abstract public function send(string $buffer, int $flags = 0, int $length = null);

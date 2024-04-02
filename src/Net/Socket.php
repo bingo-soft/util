@@ -1098,8 +1098,8 @@ class Socket
         $this->impl->write($buffer, $length);
     }
 
-    public function read(int $length, int $type = PHP_BINARY_READ)
+    public function read(int $length, int $type = PHP_BINARY_READ, int $nanosTimeout = 0)
     {
-        return $this->impl->read($length, $type);
+        return $this->impl->read($length, $type, $nanosTimeout);
     }
 }
